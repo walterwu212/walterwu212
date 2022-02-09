@@ -1,0 +1,60 @@
+---
+title: "Individual Assignment #3"
+output: html_notebook
+---
+***
+<center> 
+### Regression with ARIMA Errors Laboratory.
+#### (Total 40 pts.)
+#### Due: Dec. 2 (before midnight)
+</center>
+***
+
+As a newly minted MSBA you start working for a large resort hotel managing 1,877 rooms.  A tour operator that you freqently do business with has requested a block of 60 rooms for Aug. 22.  As this operator will pay a discounted rate for each room, your manager is uncertain if she should give this block of rooms to the tour operator, and she  has asked you to provide model-based support for this decision.
+
+Although the price is discounted and it may prevent you from selling some of these rooms at the regular price, if you reject this request, any empty rooms will not generate any reveue and you would have incurred an opportunity cost by not selling these rooms.
+
+After judicious consideration of the economic tradeoffs in the Newsvendor model, you and your manager detrmine that the block should be assigned to the tour operator only if the probability of your organic demand (excluding the room block in question) is smaller than 67% (i.e., you are on track to achieve a 67% service level).
+
+To address the booking question you examine the following data set and proceed to develop a demand forecast model.
+
+
+
+The data set **Booking Exercise.csv** consists of daily observations of the following six variables:
+
+* **DATE**: Calendar date corresponding to each observation.
+
+* **DOW**: Index (1-7) to indicate the day of the week each **DATE** corresponds to. This is redundant and it is eliminated below.
+
+* **DEMAND**: Number of rooms actually sold on each **DATE**.
+
+* **TUESDAY.BOOK**: Number of rooms booked on the Tuesday of the previous week for each day of the forthcoming week.  This variable is used as an input to inform the forecasts of **DEMAND** for each day of the forthcoming week.
+
+* **PICKUP.RATIO**: This is a calculated variable obtained as **PICKUP.RATIO = DEMAND/TUESDAY.BOOK** historically as **DEMAND** is observed. Because of this is a calculated relationship you can use either **PICKUP.RATIO** or **TUESDAY.BOOK** but you cannot use both variables simultaneously in a model to predict **DEMAND**. 
+
+* **DOW.INDEX**: This is a pre-calculated indicator of day-of-the-week demand intensity.  This is obtained by the Hotel using information beyond what it is contained in this data set.
+
+The code below reads the data set which includes up to the latest demand information (August 17) and prepares the data for the modeling process:
+
+```{r}
+library(fpp3)
+library(tseries)
+X <- read.csv("Booking Exercise.csv") %>%
+  mutate(DATE = ymd(DATE)) %>%
+  as_tsibble(index = DATE)
+
+
+Fcst.X <- X %>% filter(DATE >= ymd("2010-08-18"))
+X <- X %>% filter(DATE <= ymd("2010-08-17"))
+```
+
+
+1. (15 pt.) Fit (a) an ETS, (b) a plain ARIMA, (c) a linear regression model to predict **DEMAND** as a function of **TUESDAY.BOOK**, (c) a non-seasonal regression model with ARIMA errors using **TUESDAY.BOOK** and **DOW.INDEX** as explanatory variables, and (d) a seasonal regression model with ARIMA errors using only **TUESDAY.BOOK** as an explanatory variable.  You may use automatic model selection to fit an initial model, but especially in cases (c) and (d) you should modify the automatically fitted models when appropriate.
+
+2. (5 pt.) Which of the models are valid?
+
+3. (5 pt.) Using the information criteria (AICc and BIC) what is the best model?
+
+4. (5 pt.) Use the **Fcst.X** data set created above to produce a demand forecast for the forthcoming week (i.e., Aug, 18 - 24) showing the default 80% and 90% confidence intervals.
+
+5. (10 pt.) What is your recommendation for your manager regarding the tour operator block?  Should your manager sell the block of 60 rooms at a discounted price?  Justify your answer.
